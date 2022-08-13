@@ -1,0 +1,570 @@
+\documentclass[a4paper, 12pt] {article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{comment}
+\usepackage{etoolbox}
+
+\swapnumbers
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[theorem]
+\newtheorem{corollary}{Corollary}[theorem]
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\theoremstyle{plain}
+\newcommand{\thistheoremname}{}
+\newtheorem{genericthm}[theorem]{\thistheoremname}
+\newenvironment{namedthm}[1]
+  {\renewcommand{\thistheoremname}{#1}
+   \begin{genericthm}}
+  {\end{genericthm}}
+
+\swapnumbers
+\newtheorem{definition}{Definition}[theorem]
+\theoremstyle{remark}
+\newtheorem{case}{Case}
+\newtheorem{subcase}{Subcase}[case]
+\newtheorem{subsubcase}{Subsubcase}[subcase]
+
+\AtBeginEnvironment{proof}{\setcounter{case}{0}}
+
+
+
+\begin{document}
+\title{Consecutivity-Restricted Permutations}
+
+
+
+\section{Introduction}
+\label{introduction}
+
+This paper counts permutations which are restricted in the length of their longest consecutive subsequence (which we shall call \emph{consecutivity}), for four naturally arising definitions of \emph{consecutivity}, using a recursive method. Permutations are mapped to sequences of vertices (paths) in a polygon for a very visual approach, and categorized into five classes (with mutual overlap). Recursive steps describe the removal or merging of sides and/or vertices, which reduces the problem to counting shorter paths in smaller polygons. 
+
+
+\section{The Four Types of Consecutivity}
+\label{four_consecutivities}
+
+\begin{comment}
+Let $\{a_m\} = a_1, a_2, ..., a_m$ be a finite sequence containing no repeated elements.
+Let $\{a\}_{x}^{y} = a_1, a_2, ..., a_m$ be a subsequence of a permutation of $k$ elements from $[1, ..., n]$.
+
+For positive integers $x, y \leq k$, let $\{p_{i\ \textrm{mod}\ k}\}_{i=x}^{y+k} = p_x, ..., p_y$ be a \textit{subsequence} of $\{p_k\}$.
+\end{comment}
+
+Let $\{p_k\} = p_1, p_2, ..., p_k$ be a permutation of $k$ elements from $[1, ..., n]$. For positive integers $x, y \leq k$, let
+
+$$\{p_k\}_{x}^{y} =
+\begin{cases}
+	p_x, ..., p_y & x\leq y \\
+	p_x, ..., p_k, p_1, ..., p_y & x>y \\
+\end{cases} $$
+
+\noindent be a \textit{proper} and \textit{improper subsequence} of $\{p_k\}$ respectively.
+
+We say $\{p_k\}_{x}^{y}$ is \textit{consecutive} if $x \leq y$ and $p_h-p_i=\pm1$ for all $h,i \in dom(\{p_k\}_{x}^{y})$ satisfying $h-i = 1$.
+We say $\{p_k\}_{x}^{y}$ is \textit{wrap-consecutive} if $x \leq y$ and $p_h-p_i \equiv \pm1 \ (\textrm{mod}\ n)$ for all $h,i \in dom(\{p_k\}_{x}^{y})$ satisfying $h-i = 1$.
+We say $\{p_k\}_{x}^{y}$ is \textit{cyclic-consecutive} if $p_h-p_i=\pm1$ for all $h,i \in dom(\{p_k\}_{x}^{y})$ satisfying $h-i \equiv 1 \ (\textrm{mod}\ k)$.
+We say $\{p_k\}_{x}^{y}$ is \textit{wrap-cyclic-consecutive} if $p_h-p_i \equiv \pm1 \ (\textrm{mod}\ n)$ for all $h,i \in dom(\{p_k\}_{x}^{y})$ satisfying $h-i \equiv 1 \ (\textrm{mod}\ k)$.
+
+\begin{comment}
+Let the \textit{consecutivity} of $\{p_k\}$ be the length of the longest \textit{consecutive} subsequence it contains.
+Let the \textit{wrap-consecutivity} of $\{p_k\}$ be the length of the longest \textit{wrap-consecutive} subsequence it contains.
+	When determining \textit{wrap-consecutivity}, $1$ and $n$ are considered consecutive because $n$ `wraps' around to $1$.
+Let the \textit{cyclic-consecutivity} of $\{p_k\}$ be the length of the longest \textit{cyclic-consecutive} subsequence it contains.
+	When determining \textit{cyclic-consecutivity}, $p_1$ and $p_k$ are considered adjacent because $p_k$ `cycles' back to $p_1$.
+Let the \textit{wrap-cyclic-consecutivity} of $\{p_k\}$ be the length of the longest \textit{wrap-cyclic-consecutive} subsequence it contains.
+	When determining \textit{wrap-cyclic-consecutivity}, $1$ and $n$ are considered consecutive and $p_1$ and $p_k$ are considered adjacent.
+\end{comment}
+Let * specify each of the four types of consecutiveness respectively: `\textit{}', `\textit{wrap-}', `\textit{cyclic-}', and `\textit{wrap-cyclic-}'.
+Let the *\textit{consecutivity} of $\{p_k\}$ be the length of the longest *\textit{consecutive} subsequence it contains.
+When determining \textit{wrap-consecutivity}, $1$ and $n$ are considered consecutive because $n$ `wraps' around to $1$.
+When determining \textit{cyclic-consecutivity}, $p_1$ and $p_k$ are considered adjacent because $p_k$ `cycles' back to $p_1$.
+When determining \textit{wrap-cyclic-consecutivity}, $1$ and $n$ are considered consecutive and $p_1$ and $p_k$ are considered adjacent.
+
+\begin{comment}
+Let $\textrm{P}_{j}^{}(n, k)$, ``$n$ permute $k$ with no $j$ \textit{consecutive}'', be the number of \textit{k}-permutations of $n$ whose \textit{consecutivity} is less than j.
+Let $\textrm{P}_{j}^{w}(n, k)$, ``$n$ permute $k$ with no $j$ \textit{wrap-consecutive}'', be the number of \textit{k}-permutations of $n$ whose \textit{wrap-consecutivity} is less than j.
+Let $\textrm{P}_{j}^{c}(n, k)$, ``$n$ permute $k$ with no $j$ \textit{cyclic-consecutive}'', be the number of \textit{k}-permutations of $n$ whose \textit{cyclic-consecutivity} is less than j.
+Let $\textrm{P}_{j}^{wc}(n, k)$, ``$n$ permute $k$ with no $j$ \textit{wrap-cyclic-consecutive}'', be the number of \textit{k}-permutations of $n$ whose \textit{wrap-cyclic-consecutivity} is less than j.
+\end{comment}
+\begin{comment}
+Let $\mathbb{P}_{j}^{}$, $\mathbb{P}_{j}^{w}$, $\mathbb{P}_{j}^{c}$, $\mathbb{P}_{j}^{wc}$ be subclasses of $\mathbb{P}$ such that all $\{p_k\} \in \mathbb{P}_{j}^{}$, $\mathbb{P}_{j}^{w}$, $\mathbb{P}_{j}^{c}$, $\mathbb{P}_{j}^{wc}$ have no $j$ \textit{consecutive}, \textit{wrap-consecutive}, \textit{cyclic-consecutive}, and \textit{wrap-cyclic-consecutive} respectively.
+\end{comment}
+\begin{comment}
+In general, let subscript $j$ and one of the superscripts `', `$w$', `$c$', `$wc$' denote the subclass with the corresponding \textit{consecutivity} restriction.
+Let $\textrm{P}_{j}^{}(n, k)$, $\textrm{P}_{j}^{w}(n, k)$, $\textrm{P}_{j}^{c}(n, k)$, $\textrm{P}_{j}^{wc}(n, k)$, ``$n$ permute $k$ with no $j$ *\textit{consecutive}'', be the number of $\{p_k\}$ whose *\textit{consecutivity} is less than j.
+\end{comment}
+
+\begin{comment}
+Let $\mathbb{P}_{j}^{}$, $\mathbb{P}_{j}^{w}$, $\mathbb{P}_{j}^{c}$, $\mathbb{P}_{j}^{wc}$ be the subclass of $\mathbb{P}$ whose partial permutations have no $j$ *\textit{consecutive}.
+Let $\mathbb{P}_{j}^{}(n, k)$, $\mathbb{P}_{j}^{w}(n, k)$, $\mathbb{P}_{j}^{c}(n, k)$, $\mathbb{P}_{j}^{wc}(n, k)$ be the set of $k$-permutations from $n$ belonging to $\mathbb{P}_{j}^{}$, $\mathbb{P}_{j}^{w}$, $\mathbb{P}_{j}^{c}$, $\mathbb{P}_{j}^{wc}$ respectively.
+Let $\textrm{P}_{j}^{}(n, k)$, $\textrm{P}_{j}^{w}(n, k)$, $\textrm{P}_{j}^{c}(n, k)$, $\textrm{P}_{j}^{wc}(n, k)$, ``$n$ permute $k$ with no $j$ *\textit{consecutive}'', be the cardinality of $\mathbb{P}_{j}^{}(n, k)$, $\mathbb{P}_{j}^{w}(n, k)$, $\mathbb{P}_{j}^{c}(n, k)$, $\mathbb{P}_{j}^{wc}(n, k)$ respectively.
+
+We generalize the above notation to other classes.
+Let the single-stroke counterpart denote the cardinality of the set.
+\end{comment}
+
+If the *\textit{consecutivity} of $\{p_k\}$ is less than $j$, we say $\{p_k\}$ has ``no $j$ *\textit{consecutive}''.
+For any class of partial permutations $\mathbb{A}$, let $\mathbb{A}_{j}^{}$, $\mathbb{A}_{j}^{w}$, $\mathbb{A}_{j}^{c}$, $\mathbb{A}_{j}^{wc}$ be the subclass of $\mathbb{A}$ whose partial permutations have no $j$ *\textit{consecutive}; let $\mathbb{A}_{j}^{}(n, k)$, $\mathbb{A}_{j}^{w}(n, k)$, $\mathbb{A}_{j}^{c}(n, k)$, $\mathbb{A}_{j}^{wc}(n, k)$ be the set of $\{p_k\}$ belonging to $\mathbb{A}_{j}^{}$, $\mathbb{A}_{j}^{w}$, $\mathbb{A}_{j}^{c}$, $\mathbb{A}_{j}^{wc}$ respectively (alternatively $\mathbb{A}(n, k, j, wrap, cyclic)$, where \textit{wrap} and \textit{cyclic} are boolean parameters specifying the type of consecutiveness); finally, let the single-stroke counterpart $\textrm{A}_{j}^{}(n, k)$, $\textrm{A}_{j}^{w}(n, k)$, $\textrm{A}_{j}^{c}(n, k)$, $\textrm{A}_{j}^{wc}(n, k)$ denote the cardinality of $\mathbb{A}_{j}^{}(n, k)$, $\mathbb{A}_{j}^{w}(n, k)$, $\mathbb{A}_{j}^{c}(n, k)$, $\mathbb{A}_{j}^{wc}(n, k)$ respectively.
+
+Let $\mathbb{P}$ be the class of unrestricted partial permutations.
+This paper develops recursive formulas for $n$ permute $k$ with no $j$ *\textit{consecutive} - $\textrm{P}_{j}^{}(n, k)$, $\textrm{P}_{j}^{w}(n, k)$, $\textrm{P}_{j}^{c}(n, k)$, and $\textrm{P}_{j}^{wc}(n, k)$.
+
+
+
+\section{Permutations as Polygonal Paths}
+\label{PPP}
+
+Consider an $n$-sided polygon with vertices labelled $[1, ..., n]$. By convention, we label the bottom right vertex as $1$ and label the remaining vertices with increasing index in the counter-clockwise direction.
+Every $k$-permutation $\{p_k\}$ can be represented by a unique, directed length-$k$ path in this polygon through vertices $p_1, p_2, ..., p_k$. Regular convex polygons are used for aesthetic purposes.
+
+Since we cannot draw all polygon sizes $n \in \mathbb{N}$ in a class, we will use abbreviated polygons with $......$ representing the omitted sides.
+A class of partial permutations is denoted by an abbreviated polygon containing various indicators.
+The cardinality $\textrm{A}_{j}^{*}(n, k)$ is denoted by an abbreviated polygon containing various indicators.
+A solid dot $\bullet$ indicates the starting vertex $p_1$.
+A hollow dot $\circ$ indicates the ending vertex $p_k$.
+A list of vertex numbers enclosed by square brackets denotes a side or undirected path section.
+A side or undirected path section is used \textit{independently} if no sides are used immediately before or after it.
+Bolded lines indicate a path section that is used \textit{independently}, in either forward or reverse order.
+The symbol $||$ on $[1, n]$ indicates \textit{wrap} is false and thus $[1, n]$ can be used freely.
+The symbol $\circlearrowleft$ around $\bullet$ indicates \textit{cyclic} is true.
+\begin{comment}
+The symbol $\times$ on a side indicates it cannot be used.
+The symbol $||$ on $[1, n]$ indicates \textit{wrap} is false and thus $[1, n]$ can be used freely since it does not increase (\textit{cyclic-})\textit{consecutivity}.
+The symbol $\circlearrowleft$ around $\bullet$ indicates \textit{cyclic} is true and thus (\textit{wrap-})\textit{cyclic-consecutivity} may increase if $\bullet$ and $\circ$ are on adjacent vertices.
+\end{comment}
+\begin{comment}
+A side is used \textit{independently} if neither of its two adjacent sides are also used.
+A path section is used \textit{independently} if no sides are used immediately before or after it.
+\end{comment}
+
+Let $\mathbb{Z}$ be the class of partial permutations which start from one of $\{1, n\}$ and end at the other.
+Let $\stackrel{x \rightarrow y}{\mathbb{Z}}$ be the subclass of $\mathbb{Z}$ whose partial permutations start and end with exactly $x$ and $y$ consecutive sides respectively.
+Let $\mathbb{S}$ be the class of partial permutations which start from one of $\{1, n\}$.
+Let $\stackrel{x}{\mathbb{S}}$ be the subclass of $\mathbb{S}$ whose partial permutations start with exactly $x$ consecutive sides in the direction opposite to $[1, n]$.
+Let $\mathbb{O}$ be the class of partial permutations which use $[1, n]$.
+Let $\stackrel{x \_ y}{\mathbb{O}}$ be the subclass of $\mathbb{O}$ whose partial permutations use exactly $x$ and $y$ consecutive sides to the left and right of $[1, n]$ respectively.
+
+\begin{definition}
+\label{nonnegative_side}
+If $x<0$, let $\mathrm{S}(n,k,j,x)=0$.
+If $x<0$ or $y<0$, let $\mathrm{Z}(n,k,j,x,y)=\mathrm{O}(n,k,j,x,y)=\mathrm{U}(n,k,j,x,y)=0$.
+\end{definition}
+
+\begin{remark}
+Negative side counts may arise from summation. Since paths cannot use a negative number of sides, the functions are defined to be $0$ in this case.
+\end{remark}
+
+Visual representations of these classes are shown below.
+See the supplementary Python program to generate images showing all possible paths.
+
+
+\begin{comment}
+Let $\mathbb{Z}_j$, $\mathbb{S}_j$, $\mathbb{O}_j$ be the subclass of $\mathbb{Z}$, $\mathbb{S}$, $\mathbb{O}$ such that all $\{p_k\} \in \mathbb{Z}_j$, $\mathbb{S}_j$, $\mathbb{O}_j$ have no $j$ \textit{consecutive} respectively.
+Let $\mathbb{O}_{j}^{c}$ be the subclass of $\mathbb{O}$ such that all $\{p_k\} \in \mathbb{O}_{j}^{c}$ have no $j$ \textit{cyclic-consecutive}.
+
+Let $\mathbb{Z}_j$ be the subclass of $\mathbb{Z}$ such that all $\{p_k\} \in \mathbb{Z}_j$ have no $j$ \textit{consecutive}.
+Let $\mathbb{S}_j$ be the subclass of $\mathbb{S}$ such that all $\{p_k\} \in \mathbb{S}_j$ have no $j$ \textit{consecutive}.
+Let $\mathbb{O}_j$ be the subclass of $\mathbb{O}$ such that all $\{p_k\} \in \mathbb{O}_j$ have no $j$ \textit{consecutive}.
+
+Let ${\stackrel{x \rightarrow y}{\mathbb{Z}}}_{\hspace{-0.175cm} j} (n, k)$ be the set of $k$-permutations in $\mathbb{Z}_j$ which start with $x$ consecutive sides and end with $y$ consecutive sides.
+Let ${\stackrel{x}{\mathbb{S}}}_{j} (n, k)$ be the set of $k$-permutations in $\mathbb{S}_j$ which start with $x$ consecutive sides.
+Let ${\stackrel{x \_ y}{\mathbb{O}}}_{\hspace{-0.075cm} j} (n, k)$ and $\stackrel{x \_ y \ }{\mathbb{O}_{j}^{c}} \hspace{-0.14cm} (n, k)$ be the set of $k$-permutations in $\mathbb{O}_j$ and $\mathbb{O}_{j}^{c}$ respectively which use $x$ and $y$ consecutive sides to the left and right of $[1, n]$ respectively.
+Let $\textrm{Z}_{j}(n, k)$ be the number of $k$-permutations in $\mathbb{Z}_{j}(n, k)$.
+\end{comment}
+
+\begin{comment}
+${\stackrel{x \rightarrow y}{\mathbb{Z}}}_{\hspace{-0.175cm} j} (n, k)$
+
+$\stackrel{x \rightarrow y \ }{\mathbb{Z}_{j}} \hspace{-0.275cm} (n, k)$
+
+\hspace{0.03cm} $\mathbb{Z}_{j}(n, k)$
+
+\hspace{-0.05cm} ${\stackrel{x \_ y}{\mathbb{O}}}_{\hspace{-0.075cm} j} (n, k)$
+\end{comment}
+
+
+
+\section{Counting Polygonal Paths $(n \geq 2)$}
+\label{CPP}
+The formulas developed in this section only hold for non-degenerate polygons ($n > 2$ in all summands). Base cases, exceptions, and values will be given in the next section.
+
+\begin{namedthm}{Vertex Removal Theorem Z}
+\label{vertex_removal_z}
+$\mathrm{Z}(n,k,j,[j-2],[j-2])=\mathrm{S}(n-1,k-1,j,[j-2])-\mathrm{Z}(n-1,k-1,j,j-2,[j-2])$.
+\end{namedthm}
+
+\begin{proof}
+We first find half of $\mathrm{Z}(n,k,j,[j-2],[j-2])$.
+
+Starting from 1, the next vertex can be $[2...n]$. Since $1$ cannot be used again, cut it away by constructing side $(n,2)$, then count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $[2...n]$ and end at $n$. There are $\frac{1}{2}\mathrm{S}(n-1,k-1,j,[j-2])$ paths from $[2...n]$ to $n$. The paths starting from $2$ and using $j-2$ consecutive sides ($(2,3,...,j-1,j)$) have been over-counted since the side $(1,2)$ was used, so subtract $\mathrm{Z}(n-1,k-1,j,j-2,[j-2])$ such paths. Finally, multiply by $2$ choices for the starting vertex ($1$ and $n$).
+\end{proof}
+
+
+\begin{namedthm}{Side Removal Theorem Z}
+\label{side_removal_z}
+$\mathrm{Z}(n,k,j,x,y)=\mathrm{Z}(n-a-b,k-a-b,j,x-a,y-b)$ for $a \leq x$, $b \leq y$.
+\end{namedthm}
+
+\begin{remark}
+Since the $a$ sides and $b$ sides next to $(1,n)$ must be used, they can be "cut" away to form a smaller polygon without affecting path count.
+\end{remark}
+
+\begin{corollary}
+\label{side_removal_z_corollary}
+Take $a=x$, $b=y$; then $\mathrm{Z}(n,k,j,x,y)=\mathrm{Z}(n-x-y,k-x-y,j,0,0)$.
+\end{corollary}
+
+
+\begin{namedthm}{Square Theorem}
+\label{square}
+$\mathrm{Z}(n,k,j,0,0)=\mathrm{Z}(n,k,j,[j-2],[j-2])-\sum_{i=1}^{j-2} \mathrm{Z}(n,k, \allowbreak j,[j-2],i)-\sum_{i=1}^{j-2} \mathrm{Z}(n,k,j,i,[j-2])+\mathrm{Z}(n-2,k-2,j,[j-3],[j-3])$.
+\end{namedthm}
+
+\begin{proof}
+This follows from Inclusion-Exclusion.
+\end{proof}
+
+
+\begin{namedthm}{Column Theorem Z1}
+\label{column_z1}
+$\mathrm{Z}(n,k,j,x,[j-2])=\mathrm{Z}(n-a,k-a,j,x-a,[j-2])$ for $a \leq x$.
+\end{namedthm}
+
+\begin{proof}
+	\begin{align*}
+		\mathrm{Z}(n,k,j,x,[j-2]) &=\sum_{i=0}^{j-2} \mathrm{Z}(n,k,j,x,i) \\
+		&=\sum_{i=0}^{j-2} \mathrm{Z}(n-a,k-a,j,x-a,i) &&\text{(\ref{side_removal_z})} \\
+		&=\mathrm{Z}(n-a,k-a,j,x-a,[j-2]) && \qedhere
+	\end{align*}
+\end{proof}
+
+\begin{corollary}
+Take $a=x-1$; then $\mathrm{Z}(n,k,j,x,[j-2])=\mathrm{Z}(n-x+1,k-x+1,j,1,[j-2])$.
+\end{corollary}
+
+\begin{corollary}
+$\mathrm{Z}(n,k,j,0,0)=\mathrm{Z}(n+1,k+1,j,1,[j-2])-\sum_{i=1}^{j-2} \mathrm{Z}(n,k,j,0,i)$.
+\end{corollary}
+
+\begin{namedthm}{Column Theorem Z2}
+\label{column_z2}
+$\mathrm{Z}(n,k,j,1,[j-2])=\mathrm{Z}(n-1,k-1,j,[j-2],[j-2]) - \sum_{i=1}^{j-2} \mathrm{Z}(n-1,k-1,j,i,[j-2])$.
+\end{namedthm}
+
+\begin{proof}
+	\begin{align*}
+		\mathrm{Z}(n,k,j,1,[j-2]) &=\mathrm{Z}(n-1,k-1,j,0,[j-2]) &&\text{(\ref{column_z1})} \\
+		&=\mathrm{Z}(n-1,k-1,j,[j-2],[j-2]) \\
+		&\qquad\qquad - \sum_{i=1}^{j-2} \mathrm{Z}(n-1,k-1,j,i,[j-2]) &&\qedhere
+	\end{align*}
+\end{proof}
+
+
+\begin{namedthm}{Symmetry Theorem Z}
+\label{symmetry_z}
+$\mathrm{Z}(n,k,j,x,y)=\mathrm{Z}(n,k,j,y,x)$.
+\end{namedthm}
+
+\begin{proof}
+This follows from symmetry.
+\end{proof}
+
+
+\begin{namedthm}{Complement Theorem}
+\label{complement}
+$\mathrm{Z}(n,k,j,x,0)=\mathrm{S}(n-x-1,k-x-1,j,0)-\mathrm{Z}(n-1,k-1,j,x,[j-2])$.
+\end{namedthm}
+
+\begin{proof}
+We first consider half of $\mathrm{Z}(n,k,j,x,0)$, the paths starting from 1.
+
+Since the path ends at $n$ with $0$ consecutive sides, construct side $(1,n-1)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $1$, use $x$ consecutive sides, and end anywhere except $n-1$. There are $\frac{1}{2}\mathrm{S}(n-1,k-1,j,x)$ paths which start from $1$, use $x$ consecutive sides, and end at $[1+x...n-1]$. Subtract $\frac{1}{2}\mathrm{Z}(n-1,k-1,j,x,[j-2])$, the number of over-counted paths ending at $n-1$. Finally, multiply by two choices for the starting vertex ($1$ and $n$).
+\end{proof}
+
+
+\begin{namedthm}{Vertex Removal Theorem S1}
+\label{vertex_removal_s1}
+$\mathrm{S}(n,k,j,0)=2\mathrm{P}(n-1,k-1,j,false, \allowbreak false)-\mathrm{S}(n-1,k-1,j,[j-2])$.
+\end{namedthm}
+
+\begin{proof}
+Again, we first consider half of $\mathrm{S}(n,k,j,0)$, the paths starting from 1.
+
+The second vertex can be $[3...n]$. Since $1$ cannot be used again, cut the vertex away by constructing side $(n,2)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $[3...n]$ and can use $(n,2)$ freely. There are $\mathrm{P}(n-1,k-1,j,false,false)$ paths starting from $[2...n]$ which can use $(n,2)$ freely. Subtract $\frac{1}{2}\mathrm{S}(n-1,k-1,j,[j-2])$ paths starting from $2$. Finally, multiply by two choices for the starting vertex.
+\end{proof}
+
+
+\begin{namedthm}{Vertex Removal Theorem S2}
+\label{vertex_removal_s2}
+$\mathrm{S}(n,k,j,[j-2])=2\mathrm{P}(n-1,k-1,j,false,false)-\mathrm{S}(n-1,k-1,j,j-2)$.
+\end{namedthm}
+
+\begin{proof}
+
+\begin{case} $j=2$
+
+$\mathrm{S}(n,k,j,0)=2\mathrm{P}(n-1,k-1,2,false,false)-\mathrm{S}(n-1,k-1,2,0)$. This is equivalent to $j=2$ in Theorem \ref{vertex_removal_s1}.
+\end{case}
+
+\begin{case} $j>2$
+
+First consider half of $\mathrm{S}(n,k,j,[j-2])$, the paths starting from 1.
+
+The second vertex can be $[2...n]$. Since $1$ cannot be used again, cut the vertex away by constructing side $(n,2)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $[2...n]$ and can use $(n,2)$ freely. There are $\mathrm{P}(n-1,k-1,j,false,false)$ paths starting from $[2...n]$ which can use $(n,2)$ freely. The paths starting at $2$ with $j-2$ consecutive sides ($(2,3,...,j-1,j)$) have been over-counted since $(1,2)$ was used, so subtract $\frac{1}{2}\mathrm{S}(n-1,k-1,j,j-2)$ such paths. Finally, multiply the expression by two choices for the starting vertex.
+\end{case}
+
+\end{proof}
+
+
+\begin{namedthm}{Side Removal Theorem S}
+\label{side_removal_s}
+$\mathrm{S}(n,k,j,x)=\mathrm{S}(n-x,k-x,j,0)$.
+\end{namedthm}
+
+\begin{proof}
+As in \ref{side_removal_z}, since the $x$ sides next to the starting vertex must be used, cut them away by constructing side $(n,1+x)$ (or $(1,n-x)$) and count the number of length $k-x$ paths in the resulting $(n-x)$-gon which start at $1+x$ (or $n-x$) with $0$ consecutive sides.
+\end{proof}
+
+
+\begin{namedthm}{Vertex Merge Theorem O}
+\label{vertex_merge_o}
+$\mathrm{O}(n,k,j,0,0)=2\left(\frac{k-1}{n-1}\right)\mathrm{P}(n-1,k-1,j,true,false)-2\sum_{x=0}^{j-2} \sum_{y=1-x}^{j-2-x} \mathrm{O}(n,k,j,x,y)+\sum_{x=0}^{j-1} \sum_{y=1-x}^{j-1} \mathrm{O}(n,k,j,x,y)$
+\end{namedthm}
+
+\begin{proof}
+WLOG, $(1,n)$ must be used in a subsequence of $[n-j+1,n-j+2,...,n-1,1,n,2,...,j-1,j]$ of length $l \geq 2$.
+
+\begin{case} $l=2$, $(1,n)$ used independently
+\label{vertex_merge_o_leq2}
+
+Merge $1$ and $n$ into a single vertex $\mathrm{N}$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which use $N$. There are $\mathrm{P}(n-1,k-1,j,true,false)$ length $k-1$ paths with no $j$ \textit{wrap-consecutive} in an $(n-1)$-gon, cumulatively using a vertex $(k-1) \mathrm{P}(n-1,k-1,j,true,false)$ times. Since $\mathbb{P}(n-1,k-1,j,true,false)$ is rotationally symmetric, each particular vertex in the $(n-1)$-gon is used by $\left(\frac{k-1}{n-1}\right)\mathrm{P}(n-1,k-1,j,true,false)$ paths.
+
+The paths in which $\mathrm{N}$ has up to $j-2$ consecutive sides (isn't used independently) have been over-counted.
+Let there be $x$ and $y$ consecutive sides to the left and right of $\mathrm{N}$ respectively.
+There are $\mathrm{O}(n,k,j,x,y)$ over-counted paths for every pair $x, y$ satisfying $1 \leq x+y \leq j-2$, so subtract $\sum_{x=0}^{j-2} \sum_{y=1-x}^{j-2-x} \mathrm{O}(n,k,j,x,y)$ paths.
+
+Then multiply the expression by $2$ since each length $k-1$ path using $\mathrm{N}$ independently maps to two length $k$ paths containing $(1,n)$ (either $1$ or $n$ can be visited first).
+\end{case}
+
+\begin{case} $l>2$
+\label{vertex_merge_o_lg2}
+
+Let the subsequence of $[n-j+1,n-j+2,...,n-1,1,n,2,...,j-1,j]$ contain $x$ and $y$ vertices to the left and right of $1$ and $n$ respectively. There is a distinct subsequence with $l>2$ for every pair $x, y$ satisfying $x \leq j-1$, $y \leq j-1$, and $x+y \geq 1$, so there are $\sum_{x=0}^{j-1} \sum_{y=1-x}^{j-1} \mathrm{O}(n,k,j,x,y)$ paths.
+\end{case}
+
+\begin{remark}
+Some of the paths subtracted in case \ref{vertex_merge_o_leq2} are re-added in case \ref{vertex_merge_o_lg2}.
+\end{remark}
+
+\end{proof}
+
+
+\begin{namedthm}{Side Removal Theorem O}
+\label{side_removal_o}
+$\mathrm{O}(n,k,j,x,y)=\mathrm{O}(n-x-y,k-x-y,j,0,0)$.
+\end{namedthm}
+
+\begin{remark}
+As in \ref{side_removal_z} and \ref{side_removal_s}, since the $x$ and $y$ sides next to $n$ and $1$ must be used, they can be "cut" away to form a smaller polygon without affecting path count.
+\end{remark}
+
+
+\begin{namedthm}{Symmetry Theorem O}
+\label{symmetry_o}
+$\mathrm{O}(n,k,j,x,y)=\mathrm{O}(n,k,j,y,x)$.
+\end{namedthm}
+
+\begin{proof}
+This follows from symmetry.
+\end{proof}
+
+
+\begin{namedthm}{Vertex Merge Theorem U}
+\label{vertex_merge_u}
+$\mathrm{U}(n,k,j,0,0)=2\left(\frac{k-1}{n-1}\right)\mathrm{P}(n-1,k-1,j,true,true)-2\sum_{x=0}^{j-2} \sum_{y=1-x}^{j-2-x} [\mathrm{U}(n,k,j,x,y)-\sum_{d=j-x-y-1}^{j-x-2} \mathrm{Z}(n-x-1,k-x-1,j,y,d-1)-\sum_{d=j-x-y-1}^{j-y-2} \mathrm{Z}(n-y-1,k-y-1,j,x,d-1)]+\sum_{x=0}^{j-1} \sum_{y=1-x}^{j-1} [\mathrm{U}\allowbreak(n-x-y,k-x-y,j,0,0)+\sum_{d=j-1}^{j-1-x} \mathrm{Z}(n-y-1,k-y-1,j,0,d-1)+\sum_{d=j-1}^{j-1-y} \mathrm{Z}(n-x-1,k-x-1,j,0,d-1)-\sum_{d=j-x}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)-\sum_{d=j-y}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)]+2\mathrm{Z}(n-1,k-1,j,0,j-2)$.
+\end{namedthm}
+
+\begin{proof}
+As in \ref{vertex_merge_o}, WLOG, $(1,n)$ must be used in a subsequence of $[n-j+1,n-j+2,...,n-1,1,n,2,...,j-1,j]$ of length $l \geq 2$.
+
+\begin{case} $l=2$, $(1,n)$ used independently
+\label{vertex_merge_u_leq2}
+
+Merge $1$, $n$ into a single vertex $\mathrm{N}$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which use $\mathrm{N}$ and have no $j$ \textit{wrap-cyclic-consecutive}. There are $\mathrm{P}(n-1,k-1,j,true,true)$ length $k-1$ paths with no $j$ \textit{wrap-cyclic-consecutive} in an $(n-1)$-gon, cumulatively using a vertex $(k-1)\mathrm{P}(n-1,k-1,j,true,true)$ times. Since $\mathbb{P}(n-1,k-1,j,true,true)$ is rotationally symmetric, each particular vertex in the $(n-1)$-gon is used by $\left(\frac{k-1}{n-1}\right)\mathrm{P}(n-1,k-1,j,true,true)$ paths.
+
+The paths in which $\mathrm{N}$ has up to $j-2$ consecutive sides (isn't used independently) have been over-counted. There are $\mathrm{U}(n,k,j,x,y)$ paths with $x$ and $y$ consecutive sides to the left and right of $\mathrm{N}$ respectively. Those which satisfy $1 \leq x+y \leq j-2$ \emph{and} have no $j$ \textit{wrap-cyclic-consecutive} after merging $1$ and $n$ have been over-counted in $\left(\frac{k-1}{n-1}\right)\mathrm{P}(n-1,k-1,j,true,true)$.
+
+For those starting $n-x$ and ending $n-x-1$, the first and last vertices connect to form a consecutive section that may exceed $j-1$ vertices in length after $1$ and $n$ merge. Let the path end at $n-x-1$ with $d$ consecutive vertices ($d-1$ consecutive sides). After merging, the joint section will exceed $j-1$ vertices if $d+x+y+1 \geq j$. The paths with $d \geq j-x-1$ were not counted in $\mathbb{U}(n,k,j,x,y)$, since the $d$ vertices would connect with $[n-x,n-x+1,...,n-1,n]$ to exceed $j-1$ consecutive vertices. Thus there are $\frac{1}{2}\sum_{d=j-x-y-1}^{j-x-2} \mathrm{Z}(n-x-1,k-x-1,j,y,d-1)$ paths in $\mathbb{U}(n,k,j,x,y)$ which start at $n-x$ and end at $n-x-1$ and exceed $j-1$ consecutive vertices after merging. There are $\frac{1}{2}\sum_{d=j-x-y-1}^{j-x-2} \mathrm{Z}(n-x-1,k-x-1,j,y,d-1)$ more which start at $n-x-1$ and end at $n-x$. Similarly, there are $\sum_{d=j-x-y-1}^{j-y-2} \mathrm{Z}(n-y-1,k-y-1,j,x,d-1)$ more such paths with endpoints $1+y$, $2+y$.
+
+Thus there are $\mathrm{U}(n,k,j,x,y)-\sum_{d=j-x-y-1}^{j-x-2} \mathrm{Z}(n-x-1,k-x-1,j,y,d-1)-\sum_{d=j-x-y-1}^{j-y-2} \mathrm{Z}(n-y-1,k-y-1,j,x,d-1)$ over-counted paths in $\left(\frac{k-1}{n-1}\right)\mathbb{P}(n-1,k-1,j,true,true)$ for every pair $x,y$ satisfying $1 \leq x+y \leq j-2$, so subtract $\sum_{x=0}^{j-2} \sum_{y=1-x}^{j-2-x} [\mathrm{U}(n,k,j,x,y)-\sum_{d=j-x-y-1}^{j-x-2} \mathrm{Z}(n-x-1,k-x-1,j,y,d-1)-\sum_{d=j-x-y-1}^{j-y-2} \mathrm{Z}(n-y-1,k-y-1,j,x,d-1)]$ paths.
+
+Then multiply the expression by $2$ since each length $k-1$ path using $\mathrm{N}$ independently maps to two length $k$ paths containing $(1,n)$ (either $1$ or $n$ can be visited first).
+
+There is a special case which the merge method has not counted. The paths starting with $[1,n]$ and not using $(n,2)$ and ending at $n-1$ with $j-2$ consecutive sides, although having no $j$ \textit{cyclic-consecutive}, end up with a \textit{cyclic-consecutivity} of $j$ after the merge, and thus were not counted in $\left(\frac{k-1}{n-1}\right)\mathrm{P}(n-1,k-1,j,true,true)$. Since $(n,2)$ isn't used, we can remove $n$ and shift the starting vertex to $1$ in the reduced polygon without affecting path count. Cut $n$ away by constructing side $(n-1,1)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which *start* at $1$ and end at $n-1$ with $j-2$ consecutive sides. Add $\frac{1}{2}\mathrm{Z}(n-1,k-1,j,0,j-2)$ such paths. Add $\frac{1}{2}\mathrm{Z}(n-1,k-1,j,0,j-2)$ more for paths in the opposite direction (from $n-1$ to $1$). Add $\mathrm{Z}(n-1,k-1,j,0,j-2)$ more for the right hand side.
+\end{case}
+
+\begin{case} $l>2$
+\label{vertex_merge_u_lg2}
+
+Let the subsequence of $[n-j+1,n-j+2,...,n-1,1,n,2,...,j-1,j]$ contain $x$ and $y$ vertices to the left and right of $1$ and $n$ respectively, where $x \leq j-1$, $y \leq j-1$, and $x+y \geq 1$. Cut the subsequence away by constructing side $(n-x,1+y)$ and count the number of length $k-x-y$ paths in the resulting $(n-x-y)$-gon which use $(n-x,1+y)$ independently and have no $j$ \textit{cyclic-consecutive} prior to reducing. As in \ref{side_removal_o}, there are $\mathrm{U}(n-x-y,k-x-y,j,0,0)$ paths which have no $j$ \textit{cyclic-consecutive} in the reduced polygon.
+
+$n-x$ is treated as a vertex (length $1$) in the reduced polygon even if $x=0$, in which case $n-x$ connects to $2$ and cannot form a consecutive chain with $n-1$. The paths starting at $1+y$ with $0$ consecutive sides and ending at $n-1$ with $j-2$ consecutive sides (or starting at $n-1$ with $j-2$ consecutive sides and ending at $1+y$ with $0$ consecutive sides) meet the consecutivity restriction but have not been counted in $\mathrm{U}(n-x-y,k-x-y,j,0,0)$, so add $\mathrm{Z}(n-y-1,k-y-1,j,0,j-2)$ if $x=0$. Similarly, add $\mathrm{Z}(n-x-1,k-x-1,j,0,j-2)$ if $y=0$.
+
+As in \ref{side_removal_u}, for paths with endpoints $n-x$ and $n-x-1$, the endpoints connect to form a consecutive section that may exceed $j-1$ vertices in length (since $x-1$ consecutive sides have been used next to $n-x$). Let the path end at $n-x-1$ with $d$ consecutive vertices ($d-1$ consecutive sides). The joint start-end section will exceed $j-1$ vertices if $d+x \geq j$. Only the paths with $d+1<j$ have been counted in $\mathrm{U}(n-x-y,k-x-y,j,0,0)$. Thus we subtract $\sum_{d=j-x}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)$ over-counted paths. Similarly, subtract $\sum_{d=j-y}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)$ for the right hand side.
+\begin{comment}
+$n-x$ is treated as a vertex (length $1$) in the reduced polygon even if $x>1$, in which case its true length prior to reduction is $x$ vertices. 
+The paths starting at $1+y$ with $0$ consecutive sides and ending at $n-x-1$ with $d$ consecutive vertices where $d+1<j$ and $d+x \geq j$ (or starting at $n-x-1$ with $d$ consecutive vertices and ending at $1+y$ with $0$ consecutive sides) do not meet the consecutivity restriction but have been counted in $\mathrm{U}(n-x-y,k-x-y,j,0,0)$, so subtract $\sum_{d=j-x}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)$. Similarly, subtract $\sum_{d=j-y}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)$ for the right hand side.
+\begin{remark}
+If $y=0$, $(n,2)$ isn't used, thus the starting vertex can be shifted to $1$ as in case \ref{vertex_merge_u_leq2} without affecting path count.
+\end{remark}
+\end{comment}
+
+There is a distinct subsequence with $l>2$ for every pair $x, y$ satisfying $x \leq j-1$, $y \leq j-1$, and $x+y \geq 1$, thus there are $\sum_{x=0}^{j-1} \sum_{y=1-x}^{j-1} \mathrm{U}(n-x-y,k-x-y,j,0,0)+\sum_{d=j-1}^{j-1-x} \mathrm{Z}(n-y-1,k-y-1,j,0,d-1)+\sum_{d=j-1}^{j-1-y} \mathrm{Z}(n-x-1,k-x-1,j,0,d-1)-\sum_{d=j-x}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)-\sum_{d=j-y}^{j-2} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)$ paths.
+\end{case}
+
+\end{proof}
+
+
+\begin{namedthm}{Side Removal Theorem U}
+\label{side_removal_u}
+$\mathrm{U}(n,k,j,x,y)=\mathrm{U}(n-x-y,k-x-y,j,0,0)-\sum_{d=j-x-1}^{j-2} \mathrm{Z}(n-x-1,k-x-1,j,y,d-1)-\sum_{d=j-y-1}^{j-2} \mathrm{Z}(n-y-1,k-y-1,j,x,d-1)$.
+\end{namedthm}
+
+\begin{proof}
+Since $x$ and $y$ sides next to $n$ and $1$ must be used, cut them away by constructing side $(n-x,1+y)$ and count the number of length $k-x-y$ paths in the resulting $(n-x-y)$-gon which use $(n-x,1+y)$ independently and have no $j$ \textit{cyclic-consecutive} prior to reducing. As in \ref{side_removal_o}, there are $\mathrm{U}(n-x-y,k-x-y,j,0,0)$ paths which have no $j$ \textit{cyclic-consecutive} in the reduced polygon.
+
+For the paths starting $n-x$ and ending $n-x-1$, the first and last vertices connect to form a consecutive section that may exceed $j-1$ vertices in length (since $x$ consecutive sides have been used next to $n$).
+Let the path end at $n-x-1$ with $d$ consecutive vertices ($d-1$ consecutive sides). The joint start-end section will exceed $j-1$ vertices if $d \geq j-x-1$. The paths with $d \geq j-1$ have not been over-counted in $\mathrm{U}(n-x-y,k-x-y,j,0,0)$ since they already connect with $n-x-1$ to exceed $j-1$ consecutive vertices in the reduced polygon.
+Thus we subtract $\sum_{d=j-x-1}^{j-2} \frac{1}{2}\mathrm{Z}(n-x-1,k-x-1,j,y,d-1)$ over-counted paths.
+Subtract another $\sum_{d=j-x-1}^{j-2} \frac{1}{2}\mathrm{Z}(n-x-1,k-x-1,j,y,d-1)$ for paths in the opposite direction (starting $n-x-1$ and ending $n-x$).
+Similarly, some of the paths with endpoints $1+y$, $2+y$ have been over-counted, so subtract $\sum_{d=j-y-1}^{j-2} \mathrm{Z}(n-y-1,k-y-1,j,x,d-1)$ paths for the other side.
+\end{proof}
+
+
+\begin{namedthm}{Symmetry Theorem U}
+\label{symmetry_u}
+$\mathrm{U}(n,k,j,x,y)=\mathrm{U}(n,k,j,y,x)$.
+\end{namedthm}
+
+\begin{proof}
+This follows from symmetry.
+\end{proof}
+
+
+\begin{namedthm}{Restricted Consecutivity Theorem}
+\label{restricted_consecutivity}
+$\mathrm{P}(n,k,j,false,false)=\mathrm{P}(n,\allowbreak k,j,true,false)+\sum_{x=0}^{j-2} \sum_{y=j-2-x}^{j-2} \mathrm{O}(n,k,j,x,y)$.
+\end{namedthm}
+
+\begin{proof}
+To find the number of paths where \textit{wrap} is false ($(1,n)$ can be used without restriction), add the paths where $(1,n)$ \emph{is not} in a consecutive section exceeding $j-1$ vertices and the paths where $(1,n)$ \emph{is} in a consecutive section exceeding $j-1$ vertices.
+\end{proof}
+
+
+\begin{namedthm}{Restricted Wrap-Consecutivity Theorem}
+\label{restricted_wrap-consecutivity}
+$\mathrm{P}(n,k,j,true,false)=n(\mathrm{P}(n-1,k-1,j,false,false)-\mathrm{S}(n-1,k-1,j,j-2))$.
+\end{namedthm}
+
+\begin{proof}
+
+\begin{case} $j=2$
+
+Starting from vertex $s$, the next vertex can be any of $[s+2,...,n,1,...,s-2]$. Since $s$ cannot be used again, cut it away by constructing side $(s-1,s+1)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $[s+2,...,s-2]$ and can use $(s-1,s+1)$ without restriction. There are $\mathrm{P}(n-1,k-1,2,false,false)$ length $k-1$ paths in the reduced polygon which start from $[s+1,...,s-1]$ and can use $(s-1,s+1)$ without restriction. The paths starting at $s-1$ and $s+1$ have been over-counted, so subtract $\mathrm{S}(n-1,k-1,2,0)$ such paths. Finally, multiply by $n$ choices for $s$.
+\end{case}
+
+\begin{case} $j>2$
+
+Starting from vertex $s$, the next vertex can be any of $[s+1,...,n,1,...,s-1]$. Since $s$ cannot be used again, cut it away by constructing side $(s-1,s+1)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $[s+1,...,s-1]$, can use $(s-1,s+1)$ without restriction, and have no $j$ \textit{wrap-consecutive} prior to reducing. There are $\mathrm{P}(n-1,k-1,j,false,false)$ length $k-1$ paths in the reduced polygon which start at $[s+1,...,s-1]$ and can use $(s-1,s+1)$ without restriction. The paths starting at $s-1$ or $s+1$ and using $j-2$ consecutive sides in the direction opposite to $(s-1,s+1)$ have been over-counted (since $s$ has been used), so subtract $\mathrm{S}(n-1,k-1,j,j-2)$ such paths. Finally, multiply by $n$ choices for $s$.
+\end{case}
+
+\end{proof}
+
+
+\begin{namedthm}{Restricted Cyclic-Consecutivity Theorem}
+\label{restricted_cyclic-consecutivity}
+$\mathrm{P}(n,k,j,false,true) \allowbreak =\mathrm{P}(n,k,j,true,true)+\sum_{x=0}^{j-2} \sum_{y=j-2-x}^{j-2} [\mathrm{U}(n,k,j,x,y)+\mathrm{Z}(n,k,j,x,y)]+\sum_{x=0}^{j-3} \allowbreak \sum_{y=0}^{j-3-x} [\sum_{d=j-x-y-2}^{j-2-x} \mathrm{Z}(n-x-y,k-x-y,j,0,d)+\sum_{d=j-x-y-2}^{j-2-y} \mathrm{Z}(n-x-y,k-x-y,j,0,d)]$.
+\end{namedthm}
+
+\begin{proof}
+If $1$ and $n$ belong to the same \textit{wrap-cyclic-consecutive} section, let $l$ be the length of that section, otherwise let $l=0$. To find the number of paths with no $j$ \textit{cyclic-consecutive} where $(1,n)$ can be used without restriction, add the paths where $l<j$ and where $l \geq j$.
+
+\begin{remark}
+Since we are considering \textit{wrap-cyclic-consecutivity}, $(1,n)$ can belong to a consecutive section without being used in the path.
+\end{remark}
+
+\begin{case} $l<j$
+
+There are $\mathrm{P}(n,k,j,true,true)$ paths where $(1,n)$ is not in a \textit{cyclic-consec\-utive} section exceeding $j-1$ vertices in length.
+\end{case}
+
+\begin{case} $l \geq j$
+
+Count the paths with \textit{wrap-cyclic-consecutivity} greater than or equal to $j$ (but \textit{cyclic-consecutivity} less than $j$). We divide further based on whether or not the path uses $(1,n)$.
+
+\begin{subcase} $(1,n)$ not used
+
+For $(1,n)$ to be in a \textit{cyclic-consecutive} section without being used, the path must have endpoints $1$ and $n$. Let $x$ and $y$ consecutive sides be used next to $n$ and $1$ respectively. There are $\mathrm{Z}(n,k,j,x,y)$ paths where $l \geq j$ for every pair $x, y$ satisfying $x \leq j-2$, $y \leq j-2$, and $x+y+2 \geq j$, so $\sum_{x=0}^{j-2} \sum_{y=j-2-x}^{j-2} \mathrm{Z}(n,k,j,x,y)$ paths total.
+\end{subcase}
+
+\begin{subcase} $(1,n)$ used
+
+Again, let $x$ and $y$ sides be used next to $n$ and $1$ respectively.
+
+\begin{subsubcase} $x+y \geq j-2$
+
+There are $\mathrm{U}(n,k,j,x,y)$ paths where $l \geq j$ for every pair $x, y$ satisfying $x \leq j-2$, $y \leq j-2$, and $x+y+2 \geq j$, so $\sum_{x=0}^{j-2} \sum_{y=j-2-x}^{j-2} \mathrm{U}(n,k,j,x,y)$ paths total.
+\end{subsubcase}
+
+\begin{subsubcase} $x+y < j-2$
+
+For the consecutive section containing $(1,n)$ to exceed $j-1$ vertices when $x+y < j-2$, the path must have endpoints $n-x$, $n-x-1$ or $1+y$, $2+y$. Consider the paths ending at $n-x-1$ with $d$ consecutive vertices ($d-1$ consecutive sides). \textit{Wrap-cyclic-consecutivity} will exceed $j-1$ if $d+x+y+2 \geq j$. \textit{Cyclic-consecutivity} will be less than $j$ if $d+x+1<j$. Thus add $\sum_{d=j-x-y-2}^{j-2-x} \mathrm{Z}(n-x-y-1,k-x-y-1,j,0,d-1)$ (or equivalently, $\sum_{d=j-x-y-2}^{j-2-x} \mathrm{Z}(n-x-y,k-x-y,j,0,d)$) for every pair $x, y$ satisfying $x+y<j-2$. Similarly, add $\sum_{d=j-x-y-2}^{j-2-y} \mathrm{Z}(n-x-y,k-x-y,j,0,d)$ for every pair $x, y$ satisfying $x+y<j-2$.
+\end{subsubcase}
+
+\end{subcase}
+
+\end{case}
+
+\end{proof}
+
+
+\begin{namedthm}{Restricted Wrap-Cyclic-Consecutivity Theorem}
+\label{restricted_wrap-cyclic-consecutivity}
+$\mathrm{P}(n,k,j,true, \allowbreak true)=n(\mathrm{P}(n-1,k-1,j,false,false)-2\mathrm{Z}(n,k,j,0,j-2)-\sum_{x=0}^{j-2} \sum_{y=j-3-x}^{j-2} \allowbreak \mathrm{Z}(n-1,k-1,j,x,y))$.
+\end{namedthm}
+
+\begin{proof}
+Starting from $s$, the next vertex can be $[s+1,...,n,1,...,s-1]$. Since $s$ cannot be used again, cut it away by constructing side $(s-1,s+1)$ and count the number of length $k-1$ paths in the resulting $(n-1)$-gon which start from $[s+1,...,s-1]$, can use $(s-1,s+1)$ without restriction, and have no $j$ \textit{wrap-cyclic-consecutive} prior to reducing. There are $\mathrm{P}(n-1,k-1,j,false,false)$ length $k-1$ paths in the reduced polygon which start at $[s+1,...,s-1]$ and can use $(s-1,s+1)$ without restriction.
+
+The paths starting with $0$ consecutive sides (from $s$) and ending at one of $s-1$, $s+1$ with $j-2$ consecutive sides have been overcounted since $s \pm 1$ joins with $s$ to form a consecutive section of length $j$, so subtract $\mathrm{Z}(n,k,j,0,j-2)$ paths. Subtract another $\mathrm{Z}(n,k,j,0,j-2)$ for paths in the opposite direction.
+
+In the reduced polygon, the paths starting $s-1$ with $x$ consecutive sides and ending $s+1$ with $y$ consecutive sides where $x \leq j-2$, $y \leq j-2$, and $x+y+3 \geq j$ have been overcounted since $s+1$ joins with $s$ to form a consecutive section that is too long, so subtract $\sum_{x=0}^{j-2} \sum_{y=j-3-x}^{j-2} \frac{1}{2}\mathrm{Z}(n-1,k-1,j,x,y)$ paths. Subtract another $\sum_{x=0}^{j-2} \sum_{y=j-3-x}^{j-2} \frac{1}{2}\mathrm{Z}(n-1,k-1,j,x,y)$ for paths in the opposite direction.
+
+Finally, multiply by $n$ choices for $s$.
+\end{proof}
+
+
+
+\section{Base Cases, Exceptions, Computation}
+\label{base_cases_exceptions}
+
+
+$\mathrm{U}(2,2,j,0,0)=2$ for $j>2$. However, case \ref{vertex_merge_u_lg2} of Theorem \ref{vertex_merge_u} expects $\mathrm{U}(2,2,j,0,0)=0$ if $x+y \geq j$. 
+
+
+
+prove why the base cases obtained are correct (since formulas do not hold for $n \leq 2$).
+use inequalities to determine the bounds of summation
+
+\end{document}
+
+
+
+
+
